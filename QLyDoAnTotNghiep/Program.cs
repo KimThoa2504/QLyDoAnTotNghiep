@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using QLyDoAnTotNghiep.Configurations;
 using QLyDoAnTotNghiep.Data;
 using QLyDoAnTotNghiep.Services.BoardMembers;
+using QLyDoAnTotNghiep.Services.Dashboards;
 using QLyDoAnTotNghiep.Services.Documents;
 using QLyDoAnTotNghiep.Services.EvaluationBoards;
 using QLyDoAnTotNghiep.Services.Evaluations;
@@ -105,6 +106,7 @@ namespace QLyDoAnTotNghiep
             builder.Services.AddScoped<IBoardMembersService, BoardMembersService>();
             builder.Services.AddScoped<IDocumentsService, DocumentsService>();
             builder.Services.AddScoped<IReportsService, ReportsService>();
+            builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 
             builder.Services.AddEndpointsApiExplorer();
