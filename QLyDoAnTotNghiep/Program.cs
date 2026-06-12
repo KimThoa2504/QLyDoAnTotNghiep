@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using QLyDoAnTotNghiep.Configurations;
 using QLyDoAnTotNghiep.Data;
 using QLyDoAnTotNghiep.Services.BoardMembers;
-using QLyDoAnTotNghiep.Services.Dashboards;
+using QLyDoAnTotNghiep.Services.Dashboard;
 using QLyDoAnTotNghiep.Services.Documents;
 using QLyDoAnTotNghiep.Services.EvaluationBoards;
 using QLyDoAnTotNghiep.Services.Evaluations;

@@ -7,6 +7,7 @@ namespace QLyDoAnTotNghiep.Controllers.EvaluationBoards
 {
     [Route("api/evaluationboards")]
     [ApiController]
+    [Authorize]
     public class EvaluationBoardsController : ControllerBase
     {
         private readonly IEvaluationBoardsService _evaluationBoardsService;
@@ -17,15 +18,20 @@ namespace QLyDoAnTotNghiep.Controllers.EvaluationBoards
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var boards = await _evaluationBoardsService.GetAllEvaluationBoardsAsync();
             return Ok(boards);
         }
 
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActiveBoards()
+        {
+            var boards = await _evaluationBoardsService.GetActiveBoardsAsync();
+            return Ok(boards);
+        }
+
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
             var board = await _evaluationBoardsService.GetByIdAsync(id);
@@ -34,6 +40,7 @@ namespace QLyDoAnTotNghiep.Controllers.EvaluationBoards
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] EvaluationBoard board)
         {
             try
@@ -48,6 +55,7 @@ namespace QLyDoAnTotNghiep.Controllers.EvaluationBoards
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] EvaluationBoard board)
         {
             board.Id = id;
@@ -57,6 +65,7 @@ namespace QLyDoAnTotNghiep.Controllers.EvaluationBoards
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _evaluationBoardsService.DeleteEvaluationBoardAsync(id);

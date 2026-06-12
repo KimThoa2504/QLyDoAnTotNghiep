@@ -18,6 +18,7 @@ namespace QLyDoAnTotNghiep.Services.EvaluationBoards
             if (await _context.EvaluationBoards.AnyAsync(b => b.Name == board.Name))
                 throw new Exception("Tên hội đồng đã tồn tại");
 
+            board.CreatedAt = DateTime.UtcNow;
             _context.EvaluationBoards.Add(board);
             await _context.SaveChangesAsync();
             return board.GetSafeEvaluationBoard();
@@ -26,18 +27,23 @@ namespace QLyDoAnTotNghiep.Services.EvaluationBoards
         public async Task<List<EvaluationBoard>> GetAllEvaluationBoardsAsync()
         {
             return await _context.EvaluationBoards
-                .Select(b => new EvaluationBoard
-                {
-                    Id = b.Id,
-                    Name = b.Name,
-                    Description = b.Description
-                })
+                .Include(b => b.BoardMembers)
+                    .ThenInclude(m => m.User)
+                .Select(b => b.GetSafeEvaluationBoard())
+                .ToListAsync();
+        }
+        public async Task<List<EvaluationBoard>> GetActiveBoardsAsync()
+        {
+            return await _context.EvaluationBoards
+                .Where(b => b.Status == EvaluationBoard.BoardStatus.Active)
                 .ToListAsync();
         }
 
         public async Task<EvaluationBoard?> GetByIdAsync(int id)
         {
-            return await _context.EvaluationBoards.FindAsync(id);
+            return await _context.EvaluationBoards
+                .Include(b => b.BoardMembers)
+                .FirstOrDefaultAsync(b => b.Id == id);
         }
 
         public async Task<bool> UpdateEvaluationBoardAsync(EvaluationBoard board)
@@ -47,6 +53,11 @@ namespace QLyDoAnTotNghiep.Services.EvaluationBoards
 
             existing.Name = board.Name;
             existing.Description = board.Description;
+            existing.Type = board.Type;
+            existing.Status = board.Status;
+            existing.FormedDate = board.FormedDate;
+            existing.ExpiredDate = board.ExpiredDate;
+            existing.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return true;
@@ -59,6 +70,17 @@ namespace QLyDoAnTotNghiep.Services.EvaluationBoards
 
             _context.EvaluationBoards.Remove(board);
             await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> AssignProjectToBoardAsync(int boardId, int projectId)
+        {
+            var exists = await _context.Evaluations.AnyAsync(e =>
+                e.BoardId == boardId && e.ProjectId == projectId);
+
+            if (exists)
+                throw new Exception("Đề tài này đã được giao cho hội đồng");
+
             return true;
         }
     }

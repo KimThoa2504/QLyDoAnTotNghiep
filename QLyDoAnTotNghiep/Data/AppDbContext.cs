@@ -25,6 +25,7 @@ namespace QLyDoAnTotNghiep.Data
         public DbSet<BoardMember> BoardMembers { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<EvaluationCriterion> EvaluationCriteria { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -89,7 +90,89 @@ namespace QLyDoAnTotNghiep.Data
             modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
             modelBuilder.Entity<ProjectMember>().HasIndex(pm => new { pm.ProjectId, pm.MaSinhVien }).IsUnique();
             modelBuilder.Entity<BoardMember>().HasIndex(bm => new { bm.BoardId, bm.UserId }).IsUnique();
+
+            modelBuilder.Entity<EvaluationBoard>(entity =>
+            {
+                entity.ToTable("EvaluationBoards");
+
+                entity.Property(e => e.Name)
+                      .IsRequired()
+                      .HasMaxLength(255);
+
+                entity.Property(e => e.Description)
+                      .HasColumnType("text");
+
+                entity.Property(e => e.Status)
+                      .HasConversion<string>()           
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.Type)
+                      .HasConversion<string>()
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.FormedDate)
+                      .HasColumnType("date");
+
+                entity.Property(e => e.ExpiredDate)
+                      .HasColumnType("date");
+
+                entity.Property(e => e.CreatedAt)
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedAt)
+                      .HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Evaluation>(entity =>
+            {
+                entity.ToTable("Evaluations");
+
+                entity.Property(e => e.Session)
+                      .HasConversion<string>()
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.Status)
+                      .HasConversion<string>()
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.Comments)
+                      .HasColumnType("text");
+
+                entity.Property(e => e.EvaluationDate)
+                      .HasColumnType("date");
+
+                entity.Property(e => e.TotalScore)
+                      .HasColumnType("decimal(5,2)");
+
+                // Relationships
+                entity.HasOne(e => e.Project)
+                      .WithMany()   
+                      .HasForeignKey(e => e.ProjectId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.EvaluationBoard)
+                        .WithMany(b => b.Evaluations)
+                        .HasForeignKey(e => e.BoardId)
+                        .HasConstraintName("FK_Evaluations_EvaluationBoards");
+                });
+
+            modelBuilder.Entity<EvaluationCriterion>(entity =>
+            {
+                entity.ToTable("EvaluationCriteria");
+
+                entity.Property(e => e.CriterionName)
+                      .IsRequired()
+                      .HasMaxLength(255);
+
+                entity.Property(e => e.Score)
+                      .HasColumnType("decimal(5,2)");
+
+                entity.Property(e => e.Weight)
+                      .HasColumnType("decimal(5,2)");
+            });
+
         }
+
 
         protected AppDbContext()
         {

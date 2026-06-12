@@ -51,7 +51,7 @@ namespace QLyDoAnTotNghiep.Controllers.BoardMembers
                 return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
             }
             catch (Exception ex)
-            {
+            {   
                 return BadRequest(new { message = ex.Message });
             }
         }

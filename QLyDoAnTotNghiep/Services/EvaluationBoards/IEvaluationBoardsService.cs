@@ -9,5 +9,7 @@ namespace QLyDoAnTotNghiep.Services.EvaluationBoards
         Task<EvaluationBoard?> GetByIdAsync(int id);
         Task<bool> UpdateEvaluationBoardAsync(EvaluationBoard board);
         Task<bool> DeleteEvaluationBoardAsync(int id);
+        Task<List<EvaluationBoard>> GetActiveBoardsAsync();
+        Task<bool> AssignProjectToBoardAsync(int boardId, int projectId);
     }
 }
