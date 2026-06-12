@@ -47,17 +47,30 @@ CREATE TABLE ProjectMembers (
 CREATE TABLE EvaluationBoards (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    description TEXT
+    description TEXT,
+    type ENUM('Defense', 'Midterm', 'Final', 'Review', 'Other') NOT NULL DEFAULT 'Final',
+    status ENUM('Active', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Active',
+    formed_date DATE NULL,           -- Ngày thành lập hội đồng
+    expired_date DATE NULL,          -- Ngày hết hạn của hội đồng 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_board_name (name)
 );
-
 -- Bảng Đánh giá
 CREATE TABLE Evaluations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     project_id INT NOT NULL,
     board_id INT NOT NULL,
     evaluation_date DATE,
+   session ENUM('Midterm', 'Final', 'ReDefense', 'Other') NOT NULL DEFAULT 'Final',
+    total_score DECIMAL(5,2) NULL,           -- Điểm tổng
     comments TEXT,
-    score DECIMAL(5,2),
+    status ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending',
+    -- File biên bản (scan PDF hoặc biên bản chính thức)
+    minutes_file_path VARCHAR(500) NULL,
+    minutes_public_id VARCHAR(255) NULL,     -- Cloudinary ID
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES Projects(id) ON DELETE CASCADE,
     FOREIGN KEY (board_id) REFERENCES EvaluationBoards(id) ON DELETE CASCADE
 );
@@ -71,27 +84,35 @@ CREATE TABLE BoardMembers (
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
     UNIQUE(board_id, user_id)
 );
+-- Bảng Chi tiết tiêu chí chấm điểm (Rất quan trọng để tăng tính chuyên nghiệp)
+CREATE TABLE EvaluationCriteria (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    evaluation_id INT NOT NULL,
+    criterion_name VARCHAR(255) NOT NULL,     -- Tiêu chí chấm điểm:Vd: "Nội dung đề tài", "Trình bày", "Sản phẩm demo"
+    weight DECIMAL(5,2) NOT NULL,             -- Tỉ lệ % (tổng phải = 100)
+    score DECIMAL(5,2) NOT NULL,              -- Điểm đạt được cho tiêu chí này
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (evaluation_id) REFERENCES Evaluations(id) ON DELETE CASCADE
+);
 -- Bảng Tài liệu
 CREATE TABLE Documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
     project_id INT NOT NULL,
+    public_id VARCHAR(255) NULL,
     file_name VARCHAR(255) NOT NULL,
     file_path VARCHAR(500) NOT NULL,
+    file_type VARCHAR(50) NULL,
+    file_size BIGINT NOT NULL DEFAULT 0,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES Projects(id) ON DELETE CASCADE
 );
-ALTER TABLE Documents
-ADD COLUMN public_id VARCHAR(255) NULL;
-ALTER TABLE Documents
-ADD COLUMN file_type VARCHAR(50) NULL,
-ADD COLUMN file_size BIGINT NOT NULL DEFAULT 0;
-
 
 -- Bảng Báo cáo
 CREATE TABLE Reports (
     id INT AUTO_INCREMENT PRIMARY KEY,
     report_type ENUM('Annual', 'Progress', 'Custom') NOT NULL,
     generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    file_path VARCHAR(500) NULL,
     description TEXT
 );
 
